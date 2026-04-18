@@ -27,8 +27,7 @@ const log = (...parts) => {
   if (verbose) console.log(...parts);
 };
 
-const normalizeLockSources = (sources) =>
-  sources.map(({ syncedAt, ...source }) => source);
+const normalizeLockSources = (sources) => sources.map(({ syncedAt, ...source }) => source);
 
 const run = async ({ cmd, args: cmdArgs, cwd }) => {
   const stdout = [];

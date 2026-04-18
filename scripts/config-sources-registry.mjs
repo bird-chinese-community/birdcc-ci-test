@@ -41,7 +41,7 @@ export const configSources = [
     ],
     localAdjustments: [
       "Copy config-example.conf to config.conf for runnable CI snapshot.",
-      "Enable include \"./config.conf\" in bird.conf.",
+      'Enable include "./config.conf" in bird.conf.',
     ],
   },
   {
