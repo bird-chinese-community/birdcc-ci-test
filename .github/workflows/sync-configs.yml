@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: write
   contents: write
 
 concurrency:
@@ -45,3 +46,10 @@ jobs:
           # trigger a fresh lint/format run to exercise CI stability.
           git commit -m "chore(sync): update config snapshots $(date -u +%Y-%m-%d)"
           git push
+
+      - name: Dispatch CI canary run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run ci.yml --ref main
+          echo "Triggered CI workflow_dispatch for main."

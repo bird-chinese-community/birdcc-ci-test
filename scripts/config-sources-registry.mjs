@@ -81,7 +81,9 @@ export const configSources = [
     licenseSpdx: "NOASSERTION",
     birdMajor: 3,
     copy: [{ from: "nycm1/bird.conf", to: "bird.conf" }],
-    localAdjustments: [],
+    localAdjustments: [
+      "Normalize placeholder `source address ...` lines to end with `;` for direct parse smoke.",
+    ],
   },
 ].map(assertValidSource);
 

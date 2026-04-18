@@ -6,7 +6,7 @@
 
 [English Version](./README.md) | 中文文档
 
-> [Overview](#overview) · [Snapshot Matrix](#snapshot-matrix) · [CI Coverage](#ci-coverage) · [Daily Sync](#daily-sync) · [Playground Demos](#playground-demos) · [Directory Structure](#directory-structure) · [License Notes](#license-notes)
+> Overview · Snapshot Matrix · CI Coverage · Daily Sync · Playground Demos · License Notes
 
 ---
 
@@ -31,11 +31,11 @@ Primary objectives of the repository:
 
 ## CI Coverage
 
-| Workflow                                                     | Trigger Condition                                       | Verification Performed                                                                              |
-| ------------------------------------------------------------ | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [`ci.yml`](./.github/workflows/ci.yml)                       | push / PR / manual dispatch                             | Format check, lint, and `bird -p -c` parse validation across all snapshots                          |
-| [`changed-files.yml`](./.github/workflows/changed-files.yml) | PR modifying `configs/**/*.conf` or `configs/**/*.bird` | Format check only on changed files; reruns lint / parse for affected snapshots                      |
-| [`sync-configs.yml`](./.github/workflows/sync-configs.yml)   | Daily `02:00 UTC` / manual dispatch                     | Fetches latest configs from upstream, updates `configs/ci-lock.json`, commits, and triggers full CI |
+| Workflow                                                     | Trigger Condition                                       | Verification Performed                                                                                                                                      |
+| ------------------------------------------------------------ | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`ci.yml`](./.github/workflows/ci.yml)                       | push / PR / manual dispatch                             | Format check, lint, and `bird -p -c` parse validation across all snapshots                                                                                  |
+| [`changed-files.yml`](./.github/workflows/changed-files.yml) | PR modifying `configs/**/*.conf` or `configs/**/*.bird` | Format check only on changed files; reruns lint / parse for affected snapshots                                                                              |
+| [`sync-configs.yml`](./.github/workflows/sync-configs.yml)   | Daily `02:00 UTC` / manual dispatch                     | Refreshes upstream snapshots, commits only real diffs, and explicitly dispatches `ci.yml` so the daily canary still runs even when the push is bot-authored |
 
 All workflows utilize [`bird-chinese-community/setup-birdcc@main`](https://github.com/bird-chinese-community/setup-birdcc), making this repository a continuous validation environment for that Action.
 
@@ -71,6 +71,7 @@ flowchart LR
 - [`scripts/config-sources-registry.mjs`](./scripts/config-sources-registry.mjs) defines upstream snapshot sources
 - [`scripts/sync-configs.mjs`](./scripts/sync-configs.mjs) handles cloning, updating, copying, and minimal local adaptation
 - [`configs/ci-lock.json`](./configs/ci-lock.json) records the exact upstream commit mirrored
+- the sync workflow explicitly dispatches [`ci.yml`](./.github/workflows/ci.yml) after refresh, because a `GITHUB_TOKEN` bot push does not reliably fan out into normal `push` workflow runs
 
 To add a new configuration source:
 
@@ -84,11 +85,15 @@ To add a new configuration source:
 > [!NOTE]
 > Because GitHub does not provide syntax highlighting for BIRD configuration files, this repository offers Playground links based on the [`BIRD` TextMate language grammar](https://github.com/bird-chinese-community/BIRD-tm-language-grammar) for online preview.
 
-| Demo                                | Source File                                                          | Playground                    |
-| ----------------------------------- | -------------------------------------------------------------------- | ----------------------------- |
-| SunyzNET constants / bogon policies | [`configs/sunyznet/constant.conf`](./configs/sunyznet/constant.conf) | [Open Demo][SunyzNET_Preview] |
-| net186 startup configuration        | [`configs/net186/config.conf`](./configs/net186/config.conf)         | [Open Demo]()                 |
-| BIRD3 `nycm1` core snippet          | [`configs/bird3/nycm1/bird.conf`](./configs/bird3/nycm1/bird.conf)   | [Open Demo]()                 |
+- **SunyzNET constants / bogon policies**
+  - Source: [`configs/sunyznet/constant.conf`](./configs/sunyznet/constant.conf)
+  - Playground: [Open Demo][SunyzNET_Preview]
+- **net186 startup configuration**
+  - Source: [`configs/net186/config.conf`](./configs/net186/config.conf)
+  - Playground: [Open Demo][net186_Preview]
+- **BIRD3 `nycm1` core snippet**
+  - Source: [`configs/bird3/nycm1/bird.conf`](./configs/bird3/nycm1/bird.conf)
+  - Playground: [Open Demo][BIRD3_nycm1_Preview]
 
 Each demo link embeds a concise example with a comment referencing the source file path for traceability.
 

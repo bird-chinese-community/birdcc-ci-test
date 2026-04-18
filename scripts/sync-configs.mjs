@@ -29,6 +29,22 @@ const log = (...parts) => {
 
 const normalizeLockSources = (sources) => sources.map(({ syncedAt, ...source }) => source);
 
+const hasConfigsDiff = async () => {
+  try {
+    await run({
+      cmd: "git",
+      args: ["diff", "--quiet", "--", "configs"],
+      cwd: repoRoot,
+    });
+    return false;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("git diff --quiet")) {
+      return true;
+    }
+    throw error;
+  }
+};
+
 const run = async ({ cmd, args: cmdArgs, cwd }) => {
   const stdout = [];
   const stderr = [];
@@ -90,34 +106,40 @@ const getCommit = async (cloneDir) => {
 };
 
 const applyLocalAdjustments = async (source, destDir) => {
-  if (source.id !== "bird2-net186-config") {
+  if (source.id === "bird2-net186-config") {
+    const templatePath = resolve(destDir, "config-example.conf");
+    const generatedPath = resolve(destDir, "config.conf");
+    const birdConfPath = resolve(destDir, "bird.conf");
+
+    const template = await readFile(templatePath, "utf8");
+    const adaptedConfig = [
+      "# Adapted for birdcc-ci-test CI from config-example.conf.",
+      "# Upstream: https://github.com/186526/net186-config",
+      "",
+      template.trimEnd(),
+      "",
+    ].join("\n");
+    await writeFile(generatedPath, adaptedConfig, "utf8");
+
+    const birdConf = await readFile(birdConfPath, "utf8");
+    if (!birdConf.includes('# include "./config.conf";')) {
+      throw new Error("Expected commented config.conf include in configs/net186/bird.conf");
+    }
+
+    await writeFile(
+      birdConfPath,
+      birdConf.replace('# include "./config.conf";', 'include "./config.conf";'),
+      "utf8",
+    );
     return;
   }
 
-  const templatePath = resolve(destDir, "config-example.conf");
-  const generatedPath = resolve(destDir, "config.conf");
-  const birdConfPath = resolve(destDir, "bird.conf");
-
-  const template = await readFile(templatePath, "utf8");
-  const adaptedConfig = [
-    "# Adapted for birdcc-ci-test CI from config-example.conf.",
-    "# Upstream: https://github.com/186526/net186-config",
-    "",
-    template.trimEnd(),
-    "",
-  ].join("\n");
-  await writeFile(generatedPath, adaptedConfig, "utf8");
-
-  const birdConf = await readFile(birdConfPath, "utf8");
-  if (!birdConf.includes('# include "./config.conf";')) {
-    throw new Error("Expected commented config.conf include in configs/net186/bird.conf");
+  if (source.id === "bird3-bird-configs-output-nycm1") {
+    const birdConfPath = resolve(destDir, "bird.conf");
+    const birdConf = await readFile(birdConfPath, "utf8");
+    const normalized = birdConf.replace(/^(\s*source address\s+[^;\n]+)$/gmu, "$1;");
+    await writeFile(birdConfPath, normalized, "utf8");
   }
-
-  await writeFile(
-    birdConfPath,
-    birdConf.replace('# include "./config.conf";', 'include "./config.conf";'),
-    "utf8",
-  );
 };
 
 const syncSource = async (source) => {
@@ -190,7 +212,9 @@ const main = async () => {
 
   const existingStr = JSON.stringify(normalizeLockSources(existingLock.sources ?? []));
   const newStr = JSON.stringify(normalizeLockSources(results));
-  const hasChanges = existingStr !== newStr;
+  const metadataChanged = existingStr !== newStr;
+  const configsChanged = await hasConfigsDiff();
+  const hasChanges = metadataChanged || configsChanged;
 
   if (isCheckMode) {
     if (hasChanges) {
@@ -203,7 +227,9 @@ const main = async () => {
     return;
   }
 
-  await writeFile(lockFile, JSON.stringify(newLock, null, 2) + "\n", "utf8");
+  if (metadataChanged) {
+    await writeFile(lockFile, JSON.stringify(newLock, null, 2) + "\n", "utf8");
+  }
 
   if (hasChanges) {
     console.log("Changes detected — configs/ci-lock.json updated.");

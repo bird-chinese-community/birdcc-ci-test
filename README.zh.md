@@ -6,7 +6,7 @@
 
 [English Version](./README.md) | 中文文档
 
-> [概述](#概述) · [快照矩阵](#快照矩阵) · [CI 覆盖面](#ci-覆盖面) · [每日同步](#每日同步) · [Playground 演示](#playground-演示) · [目录结构](#目录结构) · [许可证说明](#许可证说明)
+> 概述 · 快照矩阵 · CI 覆盖面 · 每日同步 · Playground 演示 · 许可证说明
 
 ---
 
@@ -31,11 +31,11 @@
 
 ## CI 覆盖面
 
-| Workflow                                                     | 触发条件                                           | 验证内容                                                                    |
-| ------------------------------------------------------------ | -------------------------------------------------- | --------------------------------------------------------------------------- |
-| [`ci.yml`](./.github/workflows/ci.yml)                       | push / PR / 手动触发                               | 对所有快照进行 format、lint 和 `bird -p -c` 解析检查                        |
-| [`changed-files.yml`](./.github/workflows/changed-files.yml) | PR 修改 `configs/**/*.conf` 或 `configs/**/*.bird` | 仅对变更文件做 format check，并重新运行受影响快照的 lint / parse            |
-| [`sync-configs.yml`](./.github/workflows/sync-configs.yml)   | 每日 `02:00 UTC` / 手动触发                        | 从上游拉取最新配置、更新 `configs/ci-lock.json`、提交推送并触发 CI 全量测试 |
+| Workflow | 触发条件 | 验证内容 |
+| --- | --- | --- |
+| [`ci.yml`](./.github/workflows/ci.yml) | push / PR / 手动触发 | 对所有快照进行 format、lint 和 `bird -p -c` 解析检查 |
+| [`changed-files.yml`](./.github/workflows/changed-files.yml) | PR 修改 `configs/**/*.conf` 或 `configs/**/*.bird` | 仅对变更文件做 format check，并重新运行受影响快照的 lint / parse |
+| [`sync-configs.yml`](./.github/workflows/sync-configs.yml) | 每日 `02:00 UTC` / 手动触发 | 刷新上游快照、只提交真实差异，并显式派发 `ci.yml`，确保即使是 bot 推送也会跑每日金丝雀 CI |
 
 所有工作流均使用 [`bird-chinese-community/setup-birdcc@main`](https://github.com/bird-chinese-community/setup-birdcc)，因此本仓库可视为该 Action 的持续集成验证环境。
 
@@ -71,6 +71,7 @@ flowchart LR
 - [`scripts/config-sources-registry.mjs`](./scripts/config-sources-registry.mjs) 定义上游快照来源
 - [`scripts/sync-configs.mjs`](./scripts/sync-configs.mjs) 负责克隆、更新、复制，必要时进行少量本地适配
 - [`configs/ci-lock.json`](./configs/ci-lock.json) 记录当前镜像对应的上游 commit
+- sync workflow 在刷新完成后会主动派发 [`ci.yml`](./.github/workflows/ci.yml)，因为单靠 `GITHUB_TOKEN` 触发的 bot push 并不能稳定带起普通 `push` workflow
 
 如需增加新的配置来源：
 
