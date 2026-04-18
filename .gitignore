@@ -1,0 +1,6 @@
+# Byte-order-mark output, compiled assets, temp files
+*.vsix
+*.tgz
+.tmp/
+dist/
+node_modules/

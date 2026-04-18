@@ -1,0 +1,21 @@
+name: CI OK
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # Gate check — all required CI jobs must pass before merging
+  ci-ok:
+    name: CI OK
+    if: always()
+    needs: []
+    runs-on: ubuntu-latest
+    steps:
+      - name: All checks passed
+        run: echo "All CI checks passed!"

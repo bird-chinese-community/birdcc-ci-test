@@ -1,0 +1,30 @@
+name: BIRD Config Format Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bird-format-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Format check BIRD2 configs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up BIRD config tooling
+        uses: bird-chinese-community/setup-birdcc@main
+        with:
+          install-dependencies: "false"
+          cache-turbo: "false"
+          install-bird: "false"
+
+      - name: Check formatting
+        run: |
+          pnpm dlx @birdcc/cli@latest birdcc fmt bird.conf --check
