@@ -6,7 +6,7 @@
 
 [English Version](./README.md) | 中文文档
 
-> Overview · Snapshot Matrix · CI Coverage · Daily Sync · Playground Demos · License Notes
+> [Overview](#overview) · [Snapshot Matrix](#snapshot-matrix) · [CI Coverage](#ci-coverage) · [Daily Sync](#daily-sync) · [Playground Demos](#playground-demos) · [License Notes](#license-notes)
 
 ---
 
