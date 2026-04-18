@@ -4,8 +4,8 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "**/*.conf"
-      - "**/*.bird"
+      - "configs/**/*.conf"
+      - "configs/**/*.bird"
 
 permissions:
   contents: read
@@ -16,32 +16,95 @@ concurrency:
 
 jobs:
   changed-configs:
-    name: Lint changed BIRD config files
+    name: Validate changed BIRD snapshot files
     runs-on: ubuntu-latest
     steps:
-      - name: Set up BIRD config tooling
-        id: setup
+      - name: Detect changed snapshot files
+        id: detect
         uses: bird-chinese-community/setup-birdcc@main
         with:
           fetch-depth: "0"
           install-dependencies: "false"
           cache-turbo: "false"
+          install-bird: "false"
+
+      - name: Set up BIRD2 tooling
+        id: bird2
+        uses: bird-chinese-community/setup-birdcc@main
+        with:
+          checkout: "false"
+          install-dependencies: "false"
+          cache-turbo: "false"
           bird-version: "2"
 
-      - name: Lint changed config files
+      - name: Set up BIRD3 tooling
+        id: bird3
+        uses: bird-chinese-community/setup-birdcc@main
+        with:
+          checkout: "false"
+          install-dependencies: "false"
+          cache-turbo: "false"
+          bird-version: "3"
+
+      - name: Format changed files and lint affected entries
         shell: bash
         run: |
-          CHANGED="${{ steps.setup.outputs.changed-config-files }}"
-          if [ -z "$CHANGED" ]; then
-            echo "No changed BIRD config files detected."
+          set -euo pipefail
+
+          CHANGED="${{ steps.detect.outputs.changed-config-files }}"
+          if [[ -z "$CHANGED" ]]; then
+            echo "No changed BIRD snapshot files detected."
             exit 0
           fi
 
+          declare -A bird2_entries=()
+          declare -A bird3_entries=()
+
           while IFS= read -r file; do
-            [ -z "$file" ] && continue
-            echo "Checking: $file"
+            [[ -z "$file" ]] && continue
+
+            case "$file" in
+              configs/**/*.conf|configs/**/*.bird) ;;
+              *) continue ;;
+            esac
+
+            echo "::group::Checking $file"
             pnpm dlx @birdcc/cli@latest birdcc fmt "$file" --check
-            pnpm dlx @birdcc/cli@latest birdcc lint "$file" --bird
+            echo "::endgroup::"
+
+            case "$file" in
+              configs/sunyznet/*)
+                bird2_entries["configs/sunyznet"]=bird.conf
+                ;;
+              configs/net186/*)
+                bird2_entries["configs/net186"]=bird.conf
+                ;;
+              configs/bird3/nycm1/*)
+                bird3_entries["configs/bird3/nycm1"]=bird.conf
+                ;;
+            esac
           done <<< "$CHANGED"
+
+          for dir in "${!bird2_entries[@]}"; do
+            echo "::group::Lint ${dir}/${bird2_entries[$dir]}"
+            (
+              cd "$dir"
+              BIRD_BIN="${{ steps.bird2.outputs.bird-bin }}" \
+                pnpm dlx @birdcc/cli@latest birdcc lint "${bird2_entries[$dir]}" --bird
+              "${{ steps.bird2.outputs.bird-bin }}" -p -c "${bird2_entries[$dir]}"
+            )
+            echo "::endgroup::"
+          done
+
+          for dir in "${!bird3_entries[@]}"; do
+            echo "::group::Lint ${dir}/${bird3_entries[$dir]}"
+            (
+              cd "$dir"
+              BIRD_BIN="${{ steps.bird3.outputs.bird-bin }}" \
+                pnpm dlx @birdcc/cli@latest birdcc lint "${bird3_entries[$dir]}" --bird
+              "${{ steps.bird3.outputs.bird-bin }}" -p -c "${bird3_entries[$dir]}"
+            )
+            echo "::endgroup::"
+          done
         env:
-          BIRD_BIN: ${{ steps.setup.outputs.bird-bin }}
+          BIRD_BIN: ${{ steps.bird2.outputs.bird-bin }}

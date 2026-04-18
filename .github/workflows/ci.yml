@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "BIRD2 · SunyzNET"
+            dir: configs/sunyznet
+            entry: bird.conf
+            bird-version: "2"
+
+          - name: "BIRD2 · net186"
+            dir: configs/net186
+            entry: bird.conf
+            bird-version: "2"
+
+          - name: "BIRD3 · nycm1"
+            dir: configs/bird3/nycm1
+            entry: bird.conf
+            bird-version: "3"
+
+    steps:
+      - name: Set up BIRD${{ matrix.bird-version }} tooling
+        id: setup
+        uses: bird-chinese-community/setup-birdcc@main
+        with:
+          install-dependencies: "false"
+          cache-turbo: "false"
+          bird-version: ${{ matrix.bird-version }}
+
+      - name: Lint ${{ matrix.name }}
+        working-directory: ${{ matrix.dir }}
+        run: pnpm dlx @birdcc/cli@latest birdcc lint "${{ matrix.entry }}" --bird
+        env:
+          BIRD_BIN: ${{ steps.setup.outputs.bird-bin }}
+
+  format:
+    name: Format ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "BIRD2 · SunyzNET"
+            dir: configs/sunyznet
+            entry: bird.conf
+
+          - name: "BIRD2 · net186"
+            dir: configs/net186
+            entry: bird.conf
+
+          - name: "BIRD3 · nycm1"
+            dir: configs/bird3/nycm1
+            entry: bird.conf
+
+    steps:
+      - name: Set up formatting-only tooling
+        uses: bird-chinese-community/setup-birdcc@main
+        with:
+          install-dependencies: "false"
+          cache-turbo: "false"
+          install-bird: "false"
+
+      - name: Format check ${{ matrix.name }}
+        working-directory: ${{ matrix.dir }}
+        run: pnpm dlx @birdcc/cli@latest birdcc fmt "${{ matrix.entry }}" --check
+
+  parse:
+    name: Parse ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "BIRD2 · SunyzNET"
+            dir: configs/sunyznet
+            entry: bird.conf
+            bird-version: "2"
+
+          - name: "BIRD2 · net186"
+            dir: configs/net186
+            entry: bird.conf
+            bird-version: "2"
+
+          - name: "BIRD3 · nycm1"
+            dir: configs/bird3/nycm1
+            entry: bird.conf
+            bird-version: "3"
+
+    steps:
+      - name: Set up BIRD${{ matrix.bird-version }} binary
+        id: setup
+        uses: bird-chinese-community/setup-birdcc@main
+        with:
+          install-dependencies: "false"
+          cache-turbo: "false"
+          bird-version: ${{ matrix.bird-version }}
+
+      - name: Direct parse smoke for ${{ matrix.name }}
+        working-directory: ${{ matrix.dir }}
+        run: '"${{ steps.setup.outputs.bird-bin }}" -p -c "${{ matrix.entry }}"'
+
+  ci-ok:
+    name: CI OK
+    if: always()
+    needs: [lint, format, parse]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all matrix jobs
+        run: |
+          echo "lint:   ${{ needs.lint.result }}"
+          echo "format: ${{ needs.format.result }}"
+          echo "parse:  ${{ needs.parse.result }}"
+
+          if [[ "${{ needs.lint.result }}" != "success" ]] || \
+             [[ "${{ needs.format.result }}" != "success" ]] || \
+             [[ "${{ needs.parse.result }}" != "success" ]]; then
+            echo "::error::One or more CI jobs failed"
+            exit 1
+          fi
+
+          echo "All CI jobs passed!"

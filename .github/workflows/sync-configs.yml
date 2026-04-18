@@ -1,0 +1,47 @@
+name: Sync Config Snapshots
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC — no [skip ci] so daily lint CI is also exercised
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-config-snapshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: Sync upstream config snapshots
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Sync config snapshots from upstream
+        run: node scripts/sync-configs.mjs --verbose
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and push updates
+        run: |
+          git diff --quiet && echo "No changes detected." && exit 0
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add configs/
+
+          git diff --staged --quiet && echo "No staged changes." && exit 0
+
+          # Intentionally omit [skip ci] — we want the daily push to
+          # trigger a fresh lint/format run to exercise CI stability.
+          git commit -m "chore(sync): update config snapshots $(date -u +%Y-%m-%d)"
+          git push
