@@ -23,11 +23,12 @@ Primary objectives of the repository:
 
 ## Snapshot Matrix
 
-| Snapshot      | Upstream Source                                                                     | BIRD Version | Local Entry Point               | Description                                                                                      |
-| ------------- | ----------------------------------------------------------------------------------- | ------------ | ------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `sunyznet`    | [`SunyzNET/bird-config`](https://github.com/SunyzNET/bird-config)                   | 2            | `configs/sunyznet/bird.conf`    | Flat multi-file include structure; ideal for testing policies, filters, and constant defines.    |
-| `net186`      | [`186526/net186-config`](https://github.com/186526/net186-config)                   | 2            | `configs/net186/bird.conf`      | Nested directories (`bird/`, `lib/`, `protocol/`, `util/`); tests directory-level includes.      |
-| `bird3/nycm1` | [`tianshome/bird-configs-output`](https://github.com/tianshome/bird-configs-output) | 3            | `configs/bird3/nycm1/bird.conf` | Real BIRD3 configuration; validates formatter, parser, and installed BIRD3 binary compatibility. |
+| Snapshot          | Upstream Source                                                                     | BIRD Version | Local Entry Point                   | Description                                                                                      |
+| ----------------- | ----------------------------------------------------------------------------------- | ------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `sunyznet`        | [`SunyzNET/bird-config`](https://github.com/SunyzNET/bird-config)                   | 2            | `configs/sunyznet/bird.conf`        | Flat multi-file include structure; ideal for testing policies, filters, and constant defines.    |
+| `net186`          | [`186526/net186-config`](https://github.com/186526/net186-config)                   | 2            | `configs/net186/bird.conf`          | Nested directories (`bird/`, `lib/`, `protocol/`, `util/`); tests directory-level includes.      |
+| `quantum5-bird-filter` | [`quantum5/bird-filter`](https://github.com/quantum5/bird-filter)              | 2            | `configs/quantum5-bird-filter/skeleton.conf` | Composable BIRD 2.x filter library with ROA/RPKI attributes; snapshot formatted to birdcc style. |
+| `bird3/nycm1`     | [`tianshome/bird-configs-output`](https://github.com/tianshome/bird-configs-output) | 3            | `configs/bird3/nycm1/bird.conf`     | Real BIRD3 configuration; validates formatter, parser, and installed BIRD3 binary compatibility. |
 
 ## CI Coverage
 
@@ -48,7 +49,8 @@ flowchart LR
   subgraph Upstream[Upstream Example Config Sources]
     S1[SunyzNET<br/>BIRD2]
     S2[186526/net186-config<br/>BIRD2]
-    S3[tianshome/bird-configs-output<br/>BIRD3]
+    S3[quantum5/bird-filter<br/>BIRD2]
+    S4[tianshome/bird-configs-output<br/>BIRD3]
   end
 
   Sync[sync-configs.mjs<br/>Daily 02:00 UTC]
@@ -60,6 +62,7 @@ flowchart LR
   S1 --> Sync
   S2 --> Sync
   S3 --> Sync
+  S4 --> Sync
   Sync --> Snapshots
   Snapshots --> CI
   Snapshots --> Delta

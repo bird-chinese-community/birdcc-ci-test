@@ -85,6 +85,27 @@ export const configSources = [
       "Normalize placeholder `source address ...` lines to end with `;` for direct parse smoke.",
     ],
   },
+  {
+    id: "bird2-quantum5-bird-filter",
+    path: "quantum5-bird-filter",
+    dest: "configs/quantum5-bird-filter",
+    entry: "skeleton.conf",
+    repo: "quantum5/bird-filter",
+    repoGit: "https://github.com/quantum5/bird-filter.git",
+    defaultBranch: "master",
+    licenseSpdx: "MIT",
+    birdMajor: 2,
+    copy: [
+      { from: "skeleton.conf", to: "skeleton.conf" },
+      { from: "skeleton-aspa.conf", to: "skeleton-aspa.conf" },
+      { from: "filter_bgp.conf", to: "filter_bgp.conf" },
+      { from: "filter_aspa.conf", to: "filter_aspa.conf" },
+      { from: "LICENSE", to: "LICENSE" },
+    ],
+    localAdjustments: [
+      "Run `birdcc fmt --write` on snapshot files so the CI format check passes while upstream style is still 4-space indented.",
+    ],
+  },
 ].map(assertValidSource);
 
 export const sortedConfigSources = [...configSources].sort(configSourceSort);

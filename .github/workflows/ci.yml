@@ -32,6 +32,11 @@ jobs:
             entry: bird.conf
             bird-version: "2"
 
+          - name: "BIRD2 · quantum5/bird-filter"
+            dir: configs/quantum5-bird-filter
+            entry: skeleton.conf
+            bird-version: "2"
+
           - name: "BIRD3 · nycm1"
             dir: configs/bird3/nycm1
             entry: bird.conf
@@ -67,6 +72,10 @@ jobs:
             dir: configs/net186
             entry: bird.conf
 
+          - name: "BIRD2 · quantum5/bird-filter"
+            dir: configs/quantum5-bird-filter
+            entry: skeleton.conf
+
           - name: "BIRD3 · nycm1"
             dir: configs/bird3/nycm1
             entry: bird.conf
@@ -98,6 +107,11 @@ jobs:
           - name: "BIRD2 · net186"
             dir: configs/net186
             entry: bird.conf
+            bird-version: "2"
+
+          - name: "BIRD2 · quantum5/bird-filter"
+            dir: configs/quantum5-bird-filter
+            entry: skeleton.conf
             bird-version: "2"
 
           - name: "BIRD3 · nycm1"

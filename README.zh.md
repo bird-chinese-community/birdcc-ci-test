@@ -23,11 +23,12 @@
 
 ## 快照矩阵
 
-| 快照          | 上游来源                                                                            | BIRD 版本 | 本地入口                        | 说明                                                                           |
-| ------------- | ----------------------------------------------------------------------------------- | --------- | ------------------------------- | ------------------------------------------------------------------------------ |
-| `sunyznet`    | [`SunyzNET/bird-config`](https://github.com/SunyzNET/bird-config)                   | 2         | `configs/sunyznet/bird.conf`    | 扁平多文件 include 结构，适合测试策略、filter、常量定义                        |
-| `net186`      | [`186526/net186-config`](https://github.com/186526/net186-config)                   | 2         | `configs/net186/bird.conf`      | 包含 `bird/`、`lib/`、`protocol/`、`util/` 的多层目录，测试目录级 include 场景 |
-| `bird3/nycm1` | [`tianshome/bird-configs-output`](https://github.com/tianshome/bird-configs-output) | 3         | `configs/bird3/nycm1/bird.conf` | BIRD3 真实配置，用于验证 formatter、parser 以及安装后的 BIRD3 二进制兼容性     |
+| 快照                   | 上游来源                                                                            | BIRD 版本 | 本地入口                                     | 说明                                                                           |
+| ---------------------- | ----------------------------------------------------------------------------------- | --------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `sunyznet`             | [`SunyzNET/bird-config`](https://github.com/SunyzNET/bird-config)                   | 2         | `configs/sunyznet/bird.conf`                 | 扁平多文件 include 结构，适合测试策略、filter、常量定义                        |
+| `net186`               | [`186526/net186-config`](https://github.com/186526/net186-config)                   | 2         | `configs/net186/bird.conf`                   | 包含 `bird/`、`lib/`、`protocol/`、`util/` 的多层目录，测试目录级 include 场景 |
+| `quantum5-bird-filter` | [`quantum5/bird-filter`](https://github.com/quantum5/bird-filter)                   | 2         | `configs/quantum5-bird-filter/skeleton.conf` | 可组合的 BIRD 2.x filter 库，含 ROA/RPKI attribute；快照已按 birdcc 风格格式化 |
+| `bird3/nycm1`          | [`tianshome/bird-configs-output`](https://github.com/tianshome/bird-configs-output) | 3         | `configs/bird3/nycm1/bird.conf`              | BIRD3 真实配置，用于验证 formatter、parser 以及安装后的 BIRD3 二进制兼容性     |
 
 ## CI 覆盖面
 
@@ -48,7 +49,8 @@ flowchart LR
   subgraph Upstream[上游 example config 来源]
     S1[SunyzNET<br/>BIRD2]
     S2[186526/net186-config<br/>BIRD2]
-    S3[tianshome/bird-configs-output<br/>BIRD3]
+    S3[quantum5/bird-filter<br/>BIRD2]
+    S4[tianshome/bird-configs-output<br/>BIRD3]
   end
 
   Sync[sync-configs.mjs<br/>每日 02:00 UTC]
@@ -60,6 +62,7 @@ flowchart LR
   S1 --> Sync
   S2 --> Sync
   S3 --> Sync
+  S4 --> Sync
   Sync --> Snapshots
   Snapshots --> CI
   Snapshots --> Delta
