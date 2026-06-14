@@ -141,20 +141,6 @@ const applyLocalAdjustments = async (source, destDir) => {
     await writeFile(birdConfPath, normalized, "utf8");
   }
 
-  if (source.id === "bird2-quantum5-bird-filter") {
-    // Upstream currently uses 4-space indentation while birdcc enforces 2-space
-    // indentation. Format the snapshot in place so the CI format check passes.
-    // This adjustment can be removed once the upstream style matches birdcc.
-    const filesToFormat = ["skeleton.conf", "skeleton-aspa.conf", "filter_bgp.conf", "filter_aspa.conf"];
-    for (const file of filesToFormat) {
-      const filePath = resolve(destDir, file);
-      await run({
-        cmd: "pnpm",
-        args: ["dlx", "@birdcc/cli@latest", "fmt", "--write", filePath],
-        cwd: repoRoot,
-      });
-    }
-  }
 };
 
 const syncSource = async (source) => {

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bird-chinese-community/BIRD-LSP/main/packages/%40birdcc/cli/schema.json",
+  "formatter": {
+    "indentSize": 4
+  }
+}

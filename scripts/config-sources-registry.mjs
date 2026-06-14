@@ -103,7 +103,7 @@ export const configSources = [
       { from: "LICENSE", to: "LICENSE" },
     ],
     localAdjustments: [
-      "Run `birdcc fmt --write` on snapshot files so the CI format check passes while upstream style is still 4-space indented.",
+      "Add `birdcc.config.json` with `formatter.indentSize: 4` to match upstream's 4-space style instead of the default 2-space style.",
     ],
   },
 ].map(assertValidSource);
