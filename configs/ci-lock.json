@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-06T05:23:59.099Z",
+  "generatedAt": "2026-08-13T04:17:49.764Z",
   "ranked": false,
   "sources": [
     {
@@ -17,7 +17,7 @@
         "Enable include \"./config.conf\" in bird.conf."
       ],
       "commit": "9b02a517159531f77ef87caea814095c184247e0",
-      "syncedAt": "2026-08-06T05:23:57.888Z"
+      "syncedAt": "2026-08-13T04:17:48.108Z"
     },
     {
       "id": "bird2-quantum5-bird-filter",
@@ -33,7 +33,7 @@
         "Add `birdcc.config.json` with `formatter.indentSize: 4` to match upstream's 4-space style instead of the default 2-space style."
       ],
       "commit": "789b3d13bafa07ddfe793311da8a9e7e47f1dcc4",
-      "syncedAt": "2026-08-06T05:23:58.347Z"
+      "syncedAt": "2026-08-13T04:17:48.682Z"
     },
     {
       "id": "bird2-sunyznet-bird-config",
@@ -46,8 +46,8 @@
       "licenseSpdx": "MIT",
       "birdMajor": 2,
       "localAdjustments": [],
-      "commit": "0abb5773f11c68fcd76cf98962a5df1e0a5f32da",
-      "syncedAt": "2026-08-06T05:23:58.736Z"
+      "commit": "2c1ee207f1bd2590f0834566664c235b14f539ba",
+      "syncedAt": "2026-08-13T04:17:49.230Z"
     },
     {
       "id": "bird3-bird-configs-output-nycm1",
@@ -63,7 +63,7 @@
         "Normalize placeholder `source address ...` lines to end with `;` for direct parse smoke."
       ],
       "commit": "013acfa1bbb66e1541c634ed6706c5a6d69aea14",
-      "syncedAt": "2026-08-06T05:23:59.099Z"
+      "syncedAt": "2026-08-13T04:17:49.764Z"
     }
   ]
 }
